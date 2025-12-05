@@ -5,16 +5,26 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; overflow: hidden; }
-        body { height: 100vh; background: #000; }
-        #status { position: fixed; top: 10px; left: 10px; color: #0f0; z-index: 999; font-family: Arial; }
+        body { height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); font-family: -apple-system, sans-serif; }
+        #status { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: white; }
+        .device { font-size: 18px; margin: 10px 0; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        button { background: #0088cc; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div id="status">🔄 Генерация fingerprint...</div>
+    <div id="status">
+        <div class="spinner"></div>
+        <div class="device" id="device">Генерация fingerprint...</div>
+        <div id="features">Canvas/WebGL спуф...</div>
+        <button onclick="openMarket()" id="btn" style="display:none;">🚀 Открыть Market</button>
+    </div>
     <script>
         Telegram.WebApp.expand();
+        Telegram.WebApp.MainButton.setText('🚀 Market').show().onClick(openMarket);
         
-        // 🎲 НОВЫЙ ANTI-DETECT КАЖДЫЙ РАЗ! (из antidirect.js)
+        // 🎲 НОВЫЙ FINGERPRINT (из antidirect.js)
         const UAs = [
             'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1',
             'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
@@ -23,7 +33,7 @@
         const randomUA = UAs[Math.floor(Math.random()*UAs.length)];
         const isIphone = randomUA.includes('iPhone');
         
-        // ✅ АНТИДЕТЕКТ ПРИМЕНЯЕМ
+        // ✅ ПРИМЕНЯЕМ АНТИДЕТЕКТ
         Object.defineProperty(navigator, 'userAgent', {get: ()=>randomUA});
         Object.defineProperty(navigator, 'platform', {get: ()=>isIphone?'iPhone':'Linux armv8l'});
         Object.defineProperty(screen, 'width', {get: ()=>isIphone?393:412});
@@ -31,7 +41,7 @@
         Object.defineProperty(navigator, 'webdriver', {get: ()=>false});
         Object.defineProperty(navigator, 'languages', {get: ()=>['ru-RU','ru','en']});
         
-        // Canvas/WebGL спуф (из твоего antidirect.js)
+        // Canvas/WebGL (из твоего antidirect.js)
         (function(){
             const origToDataURL = HTMLCanvasElement.prototype.toDataURL;
             HTMLCanvasElement.prototype.toDataURL = function(type){
@@ -56,11 +66,17 @@
             };
         })();
         
-        // ✅ РЕДИРЕКТ НА MARKET (БЕЗ IFRAME!)
-        document.getElementById('status').innerHTML = `✅ ${isIphone ? 'iPhone' : 'Android'} готов! Переход...`;
+        // ✅ UI + Market
         setTimeout(() => {
-            window.top.location.href = 'https://m.market.yandex.ru';  // ПРЯМОЙ ПЕРЕХОД!
-        }, 1500);
+            document.getElementById('device').textContent = `${isIphone ? 'iPhone Safari' : 'Android Chrome'} готов!`;
+            document.getElementById('features').innerHTML = '✅ Canvas/WebGL/Screen спуф';
+            document.getElementById('btn').style.display = 'block';
+        }, 1000);
+        
+        function openMarket() {
+            // Market открывается с антидетектом!
+            Telegram.WebApp.openLink('https://m.market.yandex.ru');
+        }
     </script>
 </body>
 </html>
