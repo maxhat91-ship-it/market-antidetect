@@ -4,46 +4,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body style="margin:0;height:100vh;">
-    <iframe id="market" src="about:blank" style="width:100%;height:100vh;border:none;"></iframe>
+<body style="margin:0;height:100vh;overflow:hidden;">
+    <iframe id="market" style="width:100%;height:100vh;border:none;"></iframe>
     <script>
         Telegram.WebApp.expand();
         
-        // 🎲 АНТИДЕТЕКТ (применяется МГНОВЕННО)
-        const UAs = [
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17_2 Mobile/15E148 Safari/604.1',
-            'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
-        ];
-        const randomUA = UAs[Math.floor(Math.random()*UAs.length)];
-        
-        Object.defineProperty(navigator, 'userAgent', {get: ()=>randomUA});
-        Object.defineProperty(navigator, 'platform', {get: ()=>randomUA.includes('iPhone')?'iPhone':'Linux armv8l'});
+        // АНТИДЕТЕКТ СРАЗУ
+        const UA = Math.random() > 0.5 ? 
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17_2 Mobile/15E148 Safari/604.1' : 
+            'Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+            
+        Object.defineProperty(navigator, 'userAgent', {get: ()=>UA});
+        Object.defineProperty(navigator, 'platform', {get: ()=>UA.includes('iPhone')?'iPhone':'Linux armv8l'});
         Object.defineProperty(screen, 'width', {get: ()=>393});
         Object.defineProperty(screen, 'height', {get: ()=>852});
         Object.defineProperty(navigator, 'webdriver', {get: ()=>false});
         
-        // Canvas спуф
-        (function(){
-            const origToDataURL = HTMLCanvasElement.prototype.toDataURL;
-            HTMLCanvasElement.prototype.toDataURL = function(type){
-                if(type==='image/png'){
-                    const ctx = this.getContext('2d');
-                    const data = ctx.getImageData(0,0,this.width,this.height);
-                    for(let i=0; i<data.data.length; i+=4){
-                        data.data[i] += Math.floor(Math.random()*3);
-                        data.data[i+1] += Math.floor(Math.random()*3);
-                        data.data[i+2] += Math.floor(Math.random()*3);
-                    }
-                    ctx.putImageData(data,0,0);
+        // Canvas
+        HTMLCanvasElement.prototype.toDataURL = function(type){
+            if(type==='image/png'){
+                const ctx = this.getContext('2d');
+                const data = ctx.getImageData(0,0,this.width,this.height);
+                for(let i=0; i<data.data.length; i+=4){
+                    data.data[i] += Math.floor(Math.random()*3);
                 }
-                return origToDataURL.call(this,type);
-            };
-        })();
+                ctx.putImageData(data,0,0);
+            }
+            return HTMLCanvasElement.prototype.toDataURL.call(this,type);
+        };
         
-        // ❌ АВТОЗАПУСК Market ВНУТРИ WebApp (0.5 сек)
-        setTimeout(() => {
-            document.getElementById('market').src = 'https://m.market.yandex.ru';
-        }, 500);
+        // Market СРАЗУ!
+        document.getElementById('market').src = 'https://m.market.yandex.ru';
     </script>
 </body>
 </html>
